@@ -1,5 +1,7 @@
 import sys
 import scanner
+import lox_parser
+import ast_printer 
 
 class Lox():
     had_error = False
@@ -16,6 +18,11 @@ class Lox():
         tokens = scan.scan_tokens()
         for token in tokens:
             print(token)
+        parser = lox_parser.Parser(tokens)
+        expression = parser.parse()
+        if (Lox.had_error):
+            return
+        print(ast_printer.AstPrinter().print(expression))
 
     def run_file(path):
         try:
