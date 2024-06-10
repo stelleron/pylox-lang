@@ -2,9 +2,12 @@ import sys
 import scanner
 import lox_parser
 import ast_printer 
+import interpreter
 
 class Lox():
     had_error = False
+    had_runtime_error = False
+    interpreter = interpreter.Interpreter()
 
     def report(line, where, message):
         print("[line " + str(line) + "] Error" + where + ": " + message)
@@ -16,13 +19,11 @@ class Lox():
     def run(code):
         scan = scanner.Scanner(code)
         tokens = scan.scan_tokens()
-        for token in tokens:
-            print(token)
         parser = lox_parser.Parser(tokens)
         expression = parser.parse()
         if (Lox.had_error):
             return
-        print(ast_printer.AstPrinter().print(expression))
+        Lox.lox_interpreter.interpret(expression)
 
     def run_file(path):
         try:
@@ -38,6 +39,9 @@ class Lox():
         if (Lox.had_error):
             exit(65)
 
+        if (Lox.had_runtime_error):
+            exit(70)
+
     def run_prompt():
         while True:
             line = input("> ")
@@ -45,6 +49,11 @@ class Lox():
                 break;
             Lox.run(line)
             Lox.had_error = False
+    
+    def runtime_error(error):
+        print(error.message + "\n[line " + error.token.line + "]")
+        had_runtime_error = True
+
 
     def main():
         if len(sys.argv) > 2:
