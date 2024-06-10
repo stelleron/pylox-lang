@@ -18,7 +18,7 @@ class Parser():
     
     def equality(self):
         expr = self.comparision()
-        while (self.match(scanner.TokenType.BANG_EQUAL, scanner.TokenType.BANG_EQUAL)):
+        while (self.match(scanner.TokenType.BANG_EQUAL, scanner.TokenType.EQUAL_EQUAL)):
             operator = self.previous()
             right = self.comparision()
             expr = Expr.Binary(expr, operator, right)

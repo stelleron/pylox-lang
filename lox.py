@@ -7,7 +7,7 @@ import interpreter
 class Lox():
     had_error = False
     had_runtime_error = False
-    interpreter = interpreter.Interpreter()
+    lox_interpreter = interpreter.Interpreter()
 
     def report(line, where, message):
         print("[line " + str(line) + "] Error" + where + ": " + message)
@@ -51,7 +51,7 @@ class Lox():
             Lox.had_error = False
     
     def runtime_error(error):
-        print(error.message + "\n[line " + error.token.line + "]")
+        print(error.message + "\n[line " + str(error.token.line) + "]")
         had_runtime_error = True
 
 

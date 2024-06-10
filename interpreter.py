@@ -1,6 +1,7 @@
 import lox
 import expr
 import scanner
+import ast_printer
 import runtime_error
 
 class Interpreter(expr.ExprVisitor):
@@ -11,13 +12,13 @@ class Interpreter(expr.ExprVisitor):
         return obj.value
     
     def visitGrouping(self, obj):
-        return self.evalute(obj.expression)
+        return self.evaluate(obj.expression)
     
     def visitUnary(self, obj):
         right = self.evaluate(obj.right)
         if (obj.operator.type == scanner.TokenType.BANG):
             return not(self.is_truthy(right))
-        if (obj.operator.type == scanner.TokenType.MINUS):
+        elif (obj.operator.type == scanner.TokenType.MINUS):
             self.check_number_operand(obj.operator, right)
             return -float(right)
         return None
@@ -33,33 +34,33 @@ class Interpreter(expr.ExprVisitor):
                 return str(left) + str(right)
             raise runtime_error.LoxRuntimeError(obj.operator, "Operands must be two numbers or two strings")
         elif (obj.operator.type == scanner.TokenType.MINUS):
-            self.check_number_operand(obj.operator, left, right)
+            self.check_number_operands(obj.operator, left, right)
             return float(left) - float(right)
         elif (obj.operator.type == scanner.TokenType.STAR):
-            self.check_number_operand(obj.operator, left, right)
+            self.check_number_operands(obj.operator, left, right)
             return float(left) * float(right)
         elif (obj.operator.type == scanner.TokenType.SLASH):
-            self.check_number_operand(obj.operator, left, right)
+            self.check_number_operands(obj.operator, left, right)
             return float(left) / float(right)
         elif (obj.operator.type == scanner.TokenType.GREATER):
-            self.check_number_operand(obj.operator, left, right)
+            self.check_number_operands(obj.operator, left, right)
             return float(left) > float(right)
         elif (obj.operator.type == scanner.TokenType.GREATER_EQUAL):
-            self.check_number_operand(obj.operator, left, right)
+            self.check_number_operands(obj.operator, left, right)
             return float(left) >= float(right)
         elif (obj.operator.type == scanner.TokenType.LESS):
-            self.check_number_operand(obj.operator, left, right)
+            self.check_number_operands(obj.operator, left, right)
             return float(left) < float(right)
         elif (obj.operator.type == scanner.TokenType.LESS_EQUAL):
-            self.check_number_operand(obj.operator, left, right)
+            self.check_number_operands(obj.operator, left, right)
             return float(left) <= float(right)
         elif (obj.operator.type == scanner.TokenType.EQUAL_EQUAL):
-            return left == right
+            return (left == right)
         elif (obj.operator.type == scanner.TokenType.BANG_EQUAL):
             return not(left == right)
     
     def evaluate(self, obj):
-        return expr.accept(self)
+        return obj.accept(self)
     
     def is_truthy(self, obj):
         if obj == None:
@@ -73,7 +74,7 @@ class Interpreter(expr.ExprVisitor):
             return
         raise runtime_error.LoxRuntimeError(operator, "Operand must be a number")
     
-    def check_number_operand(self, operator, left, right):
+    def check_number_operands(self, operator, left, right):
         if (type(left) == float and type(left) == float):
             return
         raise runtime_error.LoxRuntimeError(operator, "Operands must be numbers")
