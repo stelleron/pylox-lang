@@ -31,6 +31,12 @@ class AstPrinter(expr.ExprVisitor):
     def visitUnary(self, obj):
         return self.parenthesize(obj.operator.lexeme, obj.right)
     
+    def visitAssign(self, obj):
+        return self.parenthesize(obj.name, obj.value)
+    
+    def visitVariable(self, obj):
+        return self.parenthesize(obj.name)
+    
 if __name__ == "__main__":
     expression = expr.Binary(
         expr.Unary(

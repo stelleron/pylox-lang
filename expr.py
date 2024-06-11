@@ -7,6 +7,10 @@ class Expr(ABC):
 
 class ExprVisitor(ABC):
 	@abstractmethod
+	def visitAssign(self, obj):
+		pass
+
+	@abstractmethod
 	def visitBinary(self, obj):
 		pass
 
@@ -21,6 +25,19 @@ class ExprVisitor(ABC):
 	@abstractmethod
 	def visitUnary(self, obj):
 		pass
+
+	@abstractmethod
+	def visitVariable(self, obj):
+		pass
+
+class Assign(Expr):
+	def __init__(self, name, value):
+		self.name = name
+		self.value = value
+
+	def accept(self, visitor):
+		return visitor.visitAssign(self)
+
 
 class Binary(Expr):
 	def __init__(self, left, operator, right):
@@ -55,5 +72,13 @@ class Unary(Expr):
 
 	def accept(self, visitor):
 		return visitor.visitUnary(self)
+
+
+class Variable(Expr):
+	def __init__(self, name):
+		self.name = name
+
+	def accept(self, visitor):
+		return visitor.visitVariable(self)
 
 

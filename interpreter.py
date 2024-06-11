@@ -1,12 +1,14 @@
 import lox
 import expr
+import environment
 import scanner
+import stmt
 import ast_printer
 import runtime_error
 
-class Interpreter(expr.ExprVisitor):
+class Interpreter(expr.ExprVisitor, stmt.StmtVisitor):
     def __init__(self):
-        pass
+        self.environment = environment.Environment()
 
     def visitLiteral(self, obj):
         return obj.value
@@ -58,9 +60,36 @@ class Interpreter(expr.ExprVisitor):
             return (left == right)
         elif (obj.operator.type == scanner.TokenType.BANG_EQUAL):
             return not(left == right)
+        
+    def visitAssign(self, obj):
+        value = self.evaluate(obj.value)
+        self.environment.assign(obj.name, value)
+        return value
+        
+    def visitVariable(self, obj):
+        return self.environment.get(obj.name)
+        
+    def visitExpression(self, stmt):
+        self.evaluate(stmt.expression)
+        return None
+    
+    def visitPrint(self, stmt):
+        value = self.evaluate(stmt.expression)
+        print(self.stringify(value))
+        return None
+    
+    def visitVar(self, stmt):
+        value = None
+        if (stmt.initializer != None):
+            value = self.evaluate(stmt.initializer)
+        self.environment.define(stmt.name.lexeme, value)
+        return None
     
     def evaluate(self, obj):
         return obj.accept(self)
+    
+    def execute(self, stmt):
+        stmt.accept(self)
     
     def is_truthy(self, obj):
         if obj == None:
@@ -90,10 +119,10 @@ class Interpreter(expr.ExprVisitor):
         
         return str(object)
     
-    def interpret(self, expression):
+    def interpret(self, statements):
         try:
-            value = self.evaluate(expression)
-            print(self.stringify(value))
+            for statement in statements:
+                self.execute(statement)
         except runtime_error.LoxRuntimeError as error:
             lox.Lox.runtime_error(error)
 

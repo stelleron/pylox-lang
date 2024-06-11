@@ -43,8 +43,15 @@ if __name__ == "__main__":
         print("Usage: generate_ast <output directory>")
         exit(64)
     define_ast(sys.argv[1], "Expr", [
+        "Assign   : name, value",
         "Binary   : left, operator, right",
         "Grouping : expression",
         "Literal  : value",
-        "Unary    : operator, right"
+        "Unary    : operator, right",
+        "Variable : name"
+    ])
+    define_ast(sys.argv[1], "Stmt", [
+        "Expression : expression",
+        "Print      : expression",
+        "Var        : name, initializer"
     ])

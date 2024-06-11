@@ -20,10 +20,10 @@ class Lox():
         scan = scanner.Scanner(code)
         tokens = scan.scan_tokens()
         parser = lox_parser.Parser(tokens)
-        expression = parser.parse()
+        statements = parser.parse()
         if (Lox.had_error):
             return
-        Lox.lox_interpreter.interpret(expression)
+        Lox.lox_interpreter.interpret(statements)
 
     def run_file(path):
         try:

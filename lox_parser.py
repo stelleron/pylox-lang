@@ -1,5 +1,7 @@
 import scanner
 import expr as Expr
+import ast_printer
+import stmt
 import lox
 
 class Parser():
@@ -8,14 +10,59 @@ class Parser():
         self.current = 0
     
     def parse(self):
-        try:
-            return self.expression()
-        except:
-            return None
+        statements = []
+        while not(self.is_at_end()):
+            statements.append(self.declaration())
+        return statements
 
     def expression(self):
-        return self.equality()
+        return self.assignment()
     
+    def declaration(self):
+        try:
+            if self.match(scanner.TokenType.VAR):
+                return self.var_declaration();
+            return self.statement()
+        except:
+            self.synchronize()
+            return None
+        
+    def statement(self):
+        if self.match(scanner.TokenType.PRINT):
+            return self.print_statement()
+        else:
+            return self.expression_statement()
+
+    def print_statement(self):
+        value = self.expression()
+        self.consume(scanner.TokenType.SEMICOLON, "Expect ';' after value.")
+        return stmt.Print(value)
+    
+    def expression_statement(self):
+        value = self.expression()
+        self.consume(scanner.TokenType.SEMICOLON, "Expect ';' after value.")
+        return stmt.Expression(value)
+    
+    def assignment(self):
+        expr = self.equality()
+        if (self.match(scanner.TokenType.EQUAL)):
+            equals = self.previous()
+            value = self.assignment()
+            if (type(expr) == Expr.Variable):
+                name = expr.name
+                return Expr.Assign(name, value)
+            self.error(equals, "Invalid assignment target.")
+        return expr
+    
+    def var_declaration(self):
+        name = self.consume(scanner.TokenType.IDENTIFIER, "Expect variable name.")
+        initializer = None
+        if (self.match(scanner.TokenType.EQUAL)):
+            initializer = self.expression()
+        self.consume(scanner.TokenType.SEMICOLON, "Expect ';' after value.")
+        return stmt.Var(name, initializer)
+
+
     def equality(self):
         expr = self.comparision()
         while (self.match(scanner.TokenType.BANG_EQUAL, scanner.TokenType.EQUAL_EQUAL)):
@@ -91,6 +138,9 @@ class Parser():
         
         if self.match(scanner.TokenType.NUMBER, scanner.TokenType.STRING):
             return Expr.Literal(self.previous().literal)
+        
+        if (self.match(scanner.TokenType.IDENTIFIER)):
+            return Expr.Variable(self.previous())
         
         if self.match(scanner.TokenType.LEFT_PAREN):
             expr = self.expression()
